@@ -1,0 +1,880 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>YVdctuAio</title>
+<link rel="icon" href="/icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Schnittplatz: dunkler Arbeitstisch, Timecodes in Bernstein, Aktionen in Petrol */
+:root{
+  --bg:#0d1114; --panel:#141a1f; --panel2:#1a2228; --line:#26313a; --fg:#e4ebef; --muted:#8a9aa6;
+  --acc:#3fb8ad; --acc-d:#2a8c84; --tc:#f0b350; --ok:#58c48a; --warn:#e8a33d; --err:#ef6a5f;
+  --s1:#5fb8f0; --s2:#f08aa8; --s3:#b39cf5; --s4:#8fd46a; --s5:#f0c35f; --s6:#5fe0d0;
+  --sans:"IBM Plex Sans","Segoe UI",system-ui,sans-serif; --mono:"IBM Plex Mono",Consolas,ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 var(--sans)}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--acc)}
+.tc{font-family:var(--mono);color:var(--tc);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono)}
+header{display:flex;align-items:center;gap:16px;padding:12px 20px;border-bottom:1px solid var(--line);background:#0f1418;position:sticky;top:0;z-index:20;flex-wrap:wrap}
+.logo{font-weight:700;letter-spacing:.01em;display:flex;align-items:center;gap:10px;white-space:nowrap}
+.logo i{width:22px;height:22px;border-radius:5px;background:linear-gradient(135deg,var(--acc),#1d5f59);display:inline-block;position:relative}
+.logo i::after{content:"";position:absolute;left:8px;top:6px;border-left:8px solid #0d1114;border-top:5px solid transparent;border-bottom:5px solid transparent}
+.eingabe{flex:1;display:flex;gap:8px;min-width:280px}
+.eingabe input{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 12px}
+.eingabe input:focus{outline:2px solid var(--acc-d);border-color:var(--acc-d)}
+.btn{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--acc-d)}
+.btn:focus-visible{outline:2px solid var(--acc)}
+.btn.p{background:var(--acc);border-color:var(--acc);color:#06201d;font-weight:600}
+.btn.p:hover{background:#52cbc0}
+.btn.klein{padding:4px 10px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.optionen{display:flex;gap:16px;flex-wrap:wrap;padding:10px 20px;border-bottom:1px solid var(--line);background:var(--panel);font-size:13.5px;align-items:center}
+.optionen label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.optionen select{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:3px 6px}
+input.kurz{width:54px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:3px 6px;text-align:center}
+input.kurz:focus{outline:2px solid var(--acc-d);border-color:var(--acc-d)}
+.galerie.einzel{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+.galerie.einzel .bild img{object-fit:contain}
+.chip{font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.chip.an{border-color:var(--acc-d);color:var(--acc)}
+main{display:grid;grid-template-columns:minmax(320px,430px) minmax(0,1fr);gap:0;min-height:calc(100vh - 110px)}
+@media (max-width:1000px){main{grid-template-columns:minmax(0,1fr)}}
+aside{border-right:1px solid var(--line);padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.karte{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0}
+.karte h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+video{width:100%;border-radius:8px;background:#000;display:block;aspect-ratio:16/9}
+.meta{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:13.5px}
+.meta dt{color:var(--muted)}
+.meta dd{margin:0;overflow-wrap:anywhere}
+.zahlen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.zahl{background:var(--panel2);border-radius:8px;padding:8px 10px}
+.zahl b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.zahl span{font-size:12px;color:var(--muted)}
+section.inhalt{padding:0 20px 40px;min-width:0}
+nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);position:sticky;top:61px;background:var(--bg);z-index:10;overflow-x:auto;padding-top:10px}
+nav.tabs button{background:none;border:none;border-bottom:2px solid transparent;padding:10px 14px;cursor:pointer;color:var(--muted);white-space:nowrap}
+nav.tabs button.akt{color:var(--fg);border-color:var(--acc)}
+nav.tabs button:disabled{opacity:.35;cursor:default}
+.seite{padding-top:18px;display:none}
+.seite.akt{display:block}
+h2{font-size:20px;margin:0 0 4px;text-wrap:balance}
+.unter{color:var(--muted);margin:0 0 16px}
+.raster2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:1300px){.raster2{grid-template-columns:minmax(0,1fr)}}
+.prosa{max-width:75ch;white-space:pre-wrap}
+ul.punkte{margin:6px 0 0;padding-left:20px}
+ul.punkte li{margin:3px 0}
+.balken{display:flex;height:12px;border-radius:6px;overflow:hidden;background:var(--panel2);margin:8px 0}
+.balken div{height:100%}
+.legende{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px}
+.legende i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.tabelle{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--panel);position:sticky;top:0}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#18212a}
+tr.klick{cursor:pointer}
+td textarea.titelfeld{width:100%;min-height:0;resize:vertical;background:transparent;border:1px solid transparent;border-radius:5px;padding:3px 5px;font:600 14px/1.4 var(--sans);color:var(--fg)}
+td textarea.titelfeld:hover,td textarea.titelfeld:focus{border-color:var(--line);background:var(--panel2)}
+.phase{font-size:12px;padding:2px 8px;border-radius:999px;background:#22303a;white-space:nowrap}
+.daumen{width:120px;border-radius:5px;display:block}
+.hinweis{border-left:3px solid var(--warn);background:#2a2216;padding:8px 12px;border-radius:0 8px 8px 0;margin:10px 0;font-size:14px}
+.hinweis.ok{border-color:var(--ok);background:#16261d}
+.werkzeug{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+.werkzeug input[type=search]{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 10px;min-width:220px}
+.tz{display:grid;grid-template-columns:96px 130px minmax(0,1fr);gap:12px;padding:8px 10px;border-bottom:1px solid var(--line);align-items:start}
+.tz:hover{background:#151d24}
+.tz .sp{font-weight:600;font-size:13.5px}
+.tz.aktiv{background:#16272a}
+@media (max-width:700px){.tz{grid-template-columns:80px minmax(0,1fr)}.tz .sp{grid-column:2}.tz .tx{grid-column:1/-1}}
+mark{background:#5a4510;color:#fff;border-radius:3px}
+.galerie{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.bild{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer}
+.bild img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;background:#000}
+.bild div{padding:9px 11px;font-size:13.5px}
+.bild b{display:block;margin:2px 0}
+.audios{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.audio audio{width:100%;margin:8px 0}
+.reihe{display:flex;gap:8px;flex-wrap:wrap}
+.form{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:10px 0}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.form label.haken{flex-direction:row;align-items:flex-start;gap:8px;line-height:1.4}
+.form label.haken input{margin-top:2px;flex:none}
+.form input,.form select,textarea{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 9px;color:var(--fg)}
+textarea{width:100%;min-height:200px;resize:vertical;font-family:var(--mono);font-size:13.5px;line-height:1.55}
+.ausgabe{white-space:pre-wrap;font-family:var(--mono);font-size:13.5px;background:#0a0e10;border:1px solid var(--line);border-radius:8px;padding:12px;max-height:460px;overflow:auto}
+.ausgabe .br{color:var(--tc)}
+.ausgabe .fl{color:var(--s2)}
+.schritte{display:grid;gap:6px;margin:12px 0}
+.schritt{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:center;font-size:14px}
+.punkt{width:12px;height:12px;border-radius:50%;background:var(--line);margin-left:4px}
+.schritt.läuft .punkt{background:var(--acc);box-shadow:0 0 0 4px #3fb8ad33;animation:puls 1.2s infinite}
+.schritt.fertig .punkt{background:var(--ok)}
+.schritt.Fehler .punkt{background:var(--err)}
+.schritt.übersprungen{color:var(--muted)}
+@keyframes puls{50%{box-shadow:0 0 0 7px #3fb8ad11}}
+@media (prefers-reduced-motion:reduce){.schritt.läuft .punkt{animation:none}}
+.fbalken{height:6px;background:var(--panel2);border-radius:3px;overflow:hidden}
+.fbalken div{height:100%;background:var(--acc);transition:width .3s}
+.log{font-family:var(--mono);font-size:12.5px;max-height:220px;overflow:auto;background:#0a0e10;border-radius:8px;padding:8px 10px;color:#b9c6cf}
+.leer{border:1px dashed var(--line);border-radius:12px;padding:28px;color:var(--muted);text-align:center}
+.toast{position:fixed;right:18px;bottom:18px;background:var(--panel2);border:1px solid var(--acc-d);border-radius:10px;padding:10px 14px;max-width:460px;z-index:50;box-shadow:0 10px 30px #0008;font-size:14px;overflow-wrap:anywhere}
+.toast.f{border-color:var(--err)}
+.verlauf-zeile{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.kchip{display:inline-block;font-size:12px;background:#1f2b33;border-radius:5px;padding:1px 6px;margin:2px 3px 0 0;color:#c6d3db}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo" title="YouTube, Video-Download, Cuts, Transkript, Upload – All in one"><i></i>YVdctuAio</div>
+  <form class="eingabe" id="formAnalyse">
+    <input id="eingabe" type="text" placeholder="YouTube-Link einfügen (youtube.com/watch?v=…, youtu.be/…, Shorts) oder Videodatei wählen" autocomplete="off" aria-label="YouTube-Link oder Videodatei">
+    <button type="button" class="btn" id="btnDatei">Datei wählen …</button>
+    <button type="button" class="btn" id="btnMehrere" title="Mehrere Links, Dateien oder eine Playlist nacheinander analysieren">Mehrere …</button>
+    <button type="submit" class="btn p" id="btnStart">Analysieren</button>
+  </form>
+</header>
+<div class="optionen" id="listeZeile" hidden style="align-items:flex-start">
+  <textarea id="eingabeListe" rows="4" style="flex:1;min-width:280px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px" placeholder="Ein Eintrag pro Zeile: YouTube-Links, Playlist-Links (youtube.com/playlist?list=…) oder Pfade zu Videodateien. Sie werden nacheinander analysiert." aria-label="Mehrere Links oder Dateien, ein Eintrag pro Zeile"></textarea>
+  <span class="muted" style="max-width:260px">Warteschlange: Alle Einträge laufen nacheinander mit den Optionen unten. Fertige Analysen stehen unter <b>Verlauf</b>.</span>
+</div>
+<div class="optionen" aria-label="Optionen">
+  <label><input type="checkbox" id="oTrennen" checked> Stimme und Musik trennen</label>
+  <label title="Speichert zusätzlich Schlagzeug, Bass und übrige Instrumente als eigene Spuren. Kostet keine extra Rechenzeit."><input type="checkbox" id="oVier"> Vier Spuren</label>
+  <label><input type="checkbox" id="oSprecher" checked> Sprecher erkennen</label>
+  <label>Sprecherzahl <select id="oAnzahl"><option value="">automatisch</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></label>
+  <label>Genauigkeit <select id="oModell"><option value="base">schnell</option><option value="small" selected>gut</option><option value="medium">sehr gut (langsam)</option></select></label>
+  <label>Sprache <select id="oSprache"><option value="de" selected>Deutsch</option><option value="en">Englisch</option><option value="tr">Türkisch</option><option value="auto">automatisch</option></select></label>
+  <label title="Auflösung beim YouTube-Download. 720p reicht für die Analyse und ist am schnellsten.">Qualität <select id="oQualitaet"><option value="720" selected>720p</option><option value="1080">1080p</option><option value="original">Original</option></select></label>
+  <label title="Übernimmt vorhandene YouTube-Untertitel als Transkript. Viel schneller als die eigene Spracherkennung, aber ohne Satzzeichen bei automatischen Untertiteln. Fehlen sie, läuft die eigene Erkennung."><input type="checkbox" id="oUntertitel"> YouTube-Untertitel nutzen</label>
+  <label><input type="checkbox" id="oGemini" checked> KI-Auswertung mit Gemini</label>
+  <label title="Zerlegt das Video zusätzlich in einzelne Bilder. Abstand 1 bis 10 Sekunden, auch 1,5."><input type="checkbox" id="oEinzel"> Einzelbilder alle <input id="oAbstand" class="kurz" type="text" inputmode="decimal" value="1" autocomplete="off" aria-label="Abstand der Einzelbilder in Sekunden (1 bis 10)"> s</label>
+  <label title="Schneller Weg: nur Standbilder und Einzelbilder, ohne Ton, Transkript und Gemini."><input type="checkbox" id="oNurBilder"> Nur Bilder (ohne Ton und Transkript)</label>
+  <button type="button" class="btn klein" id="btnNurVideo" title="Speichert nur das YouTube-Video als .mp4 in der gewählten Qualität, ohne Analyse.">Nur Video speichern</button>
+  <button type="button" class="btn klein" id="btnNurAudio" title="Speichert nur den Ton des YouTube-Videos als .mp3, ohne Analyse.">Nur Ton speichern (.mp3)</button>
+  <span class="chip" id="geminiChip">Gemini: –</span>
+  <a class="chip" id="updateChip" hidden target="_blank" rel="noopener" style="border-color:var(--tc);color:var(--tc);text-decoration:none"></a>
+</div>
+<main>
+  <aside>
+    <div class="karte" id="laufKarte" hidden>
+      <h3 id="laufTitel">Analyse läuft</h3>
+      <div id="laufSchritt" class="muted">–</div>
+      <div class="fbalken" style="margin:8px 0"><div id="laufBalken" style="width:0"></div></div>
+      <div class="schritte" id="schritte"></div>
+      <div class="log" id="log"></div>
+    </div>
+    <div class="karte" id="videoKarte" hidden>
+      <video id="player" controls preload="metadata"></video>
+      <div style="margin-top:10px" id="videoTitel"></div>
+    </div>
+    <div class="karte" id="metaKarte" hidden><h3>Video</h3><dl class="meta" id="meta"></dl></div>
+    <div class="karte" id="zahlenKarte" hidden><h3>Kennzahlen</h3><div class="zahlen" id="zahlen"></div></div>
+    <div class="karte" id="kapitelKarte" hidden><h3>Kapitel</h3><div id="kapitelMini"></div></div>
+    <div class="karte" id="startHilfe">
+      <h3>So geht's</h3>
+      <ol class="punkte" style="padding-left:18px;margin:0">
+        <li>YouTube-Link oben einfügen oder eigene Videodatei wählen.</li>
+        <li><b>Analysieren</b> klicken. Alles läuft auf deinem PC.</li>
+        <li>Ergebnisse in den Reitern ansehen. Jeder Download fragt nach dem Ordner.</li>
+      </ol>
+      <p class="muted" style="font-size:13px;margin:10px 0 0">Beim ersten Mal werden die Erkennungsmodelle geladen (einmalig etwa 1 GB).</p>
+    </div>
+  </aside>
+  <section class="inhalt">
+    <nav class="tabs" role="tablist">
+      <button data-t="uebersicht" class="akt">Übersicht</button>
+      <button data-t="struktur">Strukturplan</button>
+      <button data-t="transkript">Transkript</button>
+      <button data-t="bilder">Bilder</button>
+      <button data-t="audio">Audio</button>
+      <button data-t="schnitt">Schnitt</button>
+      <button data-t="nightcut">nightcut</button>
+      <button data-t="cartesia">Cartesia-Text</button>
+      <button data-t="export">Export</button>
+      <button data-t="verlauf">Verlauf &amp; Einstellungen</button>
+    </nav>
+    <div class="seite akt" id="t-uebersicht"><div class="leer">Noch keine Analyse geladen. Link oben einfügen und auf <b>Analysieren</b> klicken, oder unter <b>Verlauf</b> eine frühere Analyse öffnen.</div></div>
+    <div class="seite" id="t-struktur"></div>
+    <div class="seite" id="t-transkript"></div>
+    <div class="seite" id="t-bilder"></div>
+    <div class="seite" id="t-audio"></div>
+    <div class="seite" id="t-schnitt"><div class="leer">Erst ein Video analysieren oder aus dem Verlauf öffnen. Danach lassen sich hier Clips schneiden.</div></div>
+    <div class="seite" id="t-nightcut">
+      <h2>nightcut</h2>
+      <p class="unter">Macht aus einer rohen Spielaufnahme über Nacht Timeline, Shorts und YouTube-Texte. nightcut (von Nilson89, MIT-Lizenz) ist ein eigenes Programm mit eigener Installation. Hier wird es nur gestartet, das Ergebnis liegt danach im nightcut-Ordner unter <span class="mono">output</span>.</p>
+      <div class="karte">
+        <p id="nStand" class="muted" style="margin:0 0 10px">Suche nightcut …</p>
+        <div class="reihe" style="align-items:center"><button class="btn klein" id="nOrdner">nightcut-Ordner wählen …</button></div>
+        <div id="nForm" hidden>
+          <div class="eingabe" style="margin-top:12px"><input id="nAufnahme" type="text" placeholder="Aufnahme wählen (.mkv oder .mp4) oder Pfad einfügen" autocomplete="off" aria-label="Aufnahme für nightcut"><button type="button" class="btn" id="nDatei">Aufnahme wählen …</button></div>
+          <div class="reihe" style="align-items:center;margin-top:12px">
+            <label>Spielprofil <select id="nProfil" class="btn klein"></select></label>
+            <label>Modus <select id="nModus" class="btn klein"><option value="">wie im Profil</option><option value="highlights">Highlights</option><option value="letsplay">Let's Play</option></select></label>
+            <label id="nTrennenTeil" title="Für OBS-Aufnahmen mit nur einer Tonspur: trennt Stimmen und Spielsound, bevor nightcut schneidet."><input type="checkbox" id="nTrennen" checked> Stimmen vorher vom Spielsound trennen</label>
+            <label title="Füllt die Timeline zwischen den Highlights mit ruhigeren Stellen auf."><input type="checkbox" id="nFill"> Timeline auffüllen</label>
+          </div>
+          <div class="reihe" style="margin-top:12px"><button class="btn p" id="nStart">nightcut starten</button><span class="muted">Das dauert je nach Aufnahme lange und lastet die Grafikkarte aus. Der Fortschritt steht links.</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="seite" id="t-cartesia">
+      <h2>Cartesia-Sprechtext bauen</h2>
+      <p class="unter">Text einfügen oder aus dem Transkript übernehmen. Zahlen werden ausgeschrieben, Fachwörter richtig geschrieben (Naas, Wii Lan, Rejd, Käht), Bindestriche und Ausrufezeichen entfernt und Pausen gesetzt.</p>
+      <div class="reihe" style="margin-bottom:8px">
+        <button class="btn klein" id="cAusTranskript">Aus Transkript übernehmen</button>
+        <button class="btn klein" id="cBeispiel">Beispieltext</button>
+        <button class="btn klein" id="cLeeren">Leeren</button>
+      </div>
+      <textarea id="cText" placeholder="Hier deinen Vortragstext einfügen. Leerzeile = neuer Absatz (längere Pause)."></textarea>
+      <div class="form">
+        <label>Pause nach Satz (ms)<input id="cSatz" type="number" value="400" min="0" step="50"></label>
+        <label>Pause nach Absatz (ms)<input id="cAbsatz" type="number" value="700" min="0" step="50"></label>
+        <label>Pause nach Doppelpunkt (ms)<input id="cDoppel" type="number" value="300" min="0" step="50"></label>
+        <label>Füllwörter „ähm“<select id="cFueller"><option value="aus">aus</option><option value="wenig" selected>wenig</option><option value="mittel">mittel</option><option value="viel">viel</option></select></label>
+        <label>Pause nach „ähm“ (ms)<input id="cAehm" type="number" value="200" min="0" step="50"></label>
+        <label>Vorredner<input id="cVor" placeholder="z. B. Marcel (Dank am Anfang)"></label>
+        <label>Nachredner<input id="cNach" placeholder="z. B. Alexander (Übergabe)"></label>
+        <label>Cartesia-Modell<input id="cModell" value="sonic-3" placeholder="sonic-3"></label>
+        <label>Stimmen-ID (aus Cartesia)<input id="cStimme" placeholder="z. B. a0e99841-…"></label>
+        <label>Tempo (0,6–1,5)<input id="cTempo" type="number" value="1" min="0.6" max="1.5" step="0.05"></label>
+      </div>
+      <label class="muted" style="font-size:13px">Eigene Aussprache (eine Regel pro Zeile, z. B. <span class="mono">USV = U S V</span>)</label>
+      <textarea id="cAussprache" style="min-height:70px" placeholder="Wort = Schreibweise für die Stimme"></textarea>
+      <div class="reihe" style="margin:10px 0"><button class="btn p" id="cBauen">Cartesia-Text bauen</button><button class="btn" id="cNeuMischen">Füllwörter neu verteilen</button></div>
+      <div id="cErgebnis"></div>
+    </div>
+    <div class="seite" id="t-export"></div>
+    <div class="seite" id="t-verlauf">
+      <div class="raster2">
+        <div class="karte"><h3>Frühere Analysen</h3><p class="muted" style="font-size:13px;margin:0 0 6px">Alles liegt nur auf deinem PC. Nach dem Speichern kannst du Analysen löschen, um Platz zu sparen.</p><div id="verlaufListe"></div>
+          <div class="reihe" style="margin-top:10px;justify-content:space-between"><span class="muted" id="verlaufSumme"></span><button class="btn klein" id="allesLoeschen" hidden>Alle Analysen löschen</button></div></div>
+        <div class="karte"><h3>Einstellungen</h3>
+          <div class="form" style="grid-template-columns:minmax(0,1fr)">
+            <label>Gemini-API-Schlüssel (kostenlos in Google AI Studio erstellen)<input id="eSchluessel" type="password" autocomplete="off" placeholder="AIza… oder AQ.…"></label>
+            <label>Browser-Anmeldung für YouTube (nur nötig, wenn YouTube „Bot-Schutz“ meldet)<select id="eBrowser"><option value="">aus</option><option value="firefox">Firefox</option><option value="edge">Edge</option><option value="chrome">Chrome</option></select></label>
+            <label>Gemini-Modell<select id="eModell"><option value="gemini-3-flash-preview">gemini-3-flash-preview (Standard)</option><option>gemini-2.5-flash</option><option>gemini-2.5-pro</option><option>gemini-2.5-flash-lite</option></select></label>
+            <label>Cartesia-API-Schlüssel (nur nötig für „Jetzt an Cartesia senden“)<input id="eCartesia" type="password" autocomplete="off" placeholder="sk_car_…"></label>
+            <label class="haken"><input type="checkbox" id="eVideo" checked> Bei YouTube-Links schaut Gemini sich das ganze Video an (genauere Bildbeschreibung; zählt zum kostenlosen Tageskontingent von 8 Stunden Video)</label>
+          </div>
+          <p class="muted" style="font-size:13px">Ohne Schlüssel läuft alles lokal: Transkript, Sprecher, Trennung, Schnitte, Standbilder und Strukturplan. Mit Schlüssel kommen ausführliche Zusammenfassung, Bildbeschreibungen und Dramaturgie-Analyse dazu. Schlüssel holen: <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a></p>
+          <div class="reihe"><button class="btn p" id="eSpeichern">Einstellungen speichern</button><button class="btn" id="eTesten">Schlüssel testen</button></div>
+          <h3 style="margin-top:18px">YouTube-Upload</h3>
+          <p class="muted" style="font-size:13px;margin:0 0 8px">Zum Hochladen braucht das Programm einmalig deine eigene Zugangsdatei von Google (<span class="mono">client_secret.json</span>, Typ „Desktop-App“, mit freigeschalteter „YouTube Data API v3“) und danach die Anmeldung mit deinem Google-Konto. Beides bleibt nur auf diesem PC.</p>
+          <p id="ytStand" class="muted" style="margin:0 0 8px">–</p>
+          <div class="reihe"><button class="btn" id="ytZugang">Zugangsdatei wählen …</button><button class="btn" id="ytAnmelden">Bei YouTube anmelden</button><button class="btn" id="ytAbmelden">Abmelden</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast" hidden></div>
+<script>
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const hms = s => { s = Math.max(0, Math.floor(s||0)); const h=Math.floor(s/3600), m=Math.floor(s%3600/60), x=s%60; return h ? `${h}:${String(m).padStart(2,"0")}:${String(x).padStart(2,"0")}` : `${m}:${String(x).padStart(2,"0")}`; };
+const FARBEN = ["var(--s1)","var(--s2)","var(--s3)","var(--s4)","var(--s5)","var(--s6)"];
+const spFarbe = sp => FARBEN[((parseInt(String(sp).replace(/\D/g, "")) || 1) - 1) % FARBEN.length];
+const BILDFARBEN = ["#3fb8ad","#f0b350","#5fb8f0","#f08aa8","#b39cf5","#8fd46a","#8a9aa6"];
+let E = null, AKTIV_ORDNER = null, pollTimer = null, seed = 7, LAEUFT = false;
+
+async function api(pfad, body) {
+  const r = await fetch(pfad, body === undefined ? {} : {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
+  const d = await r.json().catch(() => ({fehler: "Antwort nicht lesbar"}));
+  if (!r.ok || d.fehler) throw new Error(d.fehler || r.statusText);
+  return d;
+}
+function toast(text, fehler=false) {
+  const t = $("#toast"); t.innerHTML = text; t.className = "toast" + (fehler ? " f" : ""); t.hidden = false;
+  clearTimeout(t._t); t._t = setTimeout(() => t.hidden = true, fehler ? 9000 : 6000);
+}
+const datei = p => `/datei?ordner=${encodeURIComponent(AKTIV_ORDNER)}&pfad=${encodeURIComponent(p)}`;
+function springe(sek) { const v = $("#player"); if (!v.src) return; v.currentTime = sek; v.play().catch(()=>{}); }
+
+async function speichern(dateien, opts={}) {
+  try {
+    toast("Ordner-Auswahl ist geöffnet (evtl. hinter dem Browser) …");
+    const r = await api("/api/speichern", {ordner: AKTIV_ORDNER, dateien, ...opts});
+    if (r.abgebrochen) return toast("Speichern abgebrochen.");
+    toast("Gespeichert:<br>" + r.gespeichert.map(esc).join("<br>"));
+  } catch (e) { toast("Fehler beim Speichern: " + esc(e.message), true); }
+}
+async function textSpeichern(name, inhalt) {
+  try {
+    toast("Ordner-Auswahl ist geöffnet (evtl. hinter dem Browser) …");
+    const r = await api("/api/text_speichern", {name, inhalt});
+    if (r.abgebrochen) return toast("Speichern abgebrochen.");
+    toast("Gespeichert:<br>" + esc(r.gespeichert[0]));
+  } catch (e) { toast("Fehler: " + esc(e.message), true); }
+}
+async function kopieren(text) {
+  try { await navigator.clipboard.writeText(text); toast("In die Zwischenablage kopiert."); }
+  catch { toast("Kopieren nicht möglich, bitte Text markieren und Strg+C drücken.", true); }
+}
+
+/* ---------- Tabs ---------- */
+$$("nav.tabs button").forEach(b => b.onclick = () => {
+  $$("nav.tabs button").forEach(x => x.classList.toggle("akt", x === b));
+  $$(".seite").forEach(s => s.classList.toggle("akt", s.id === "t-" + b.dataset.t));
+  if (b.dataset.t === "verlauf") ladeVerlauf();
+});
+function zeigeTab(t) { $(`nav.tabs button[data-t="${t}"]`).click(); }
+
+/* ---------- Analyse starten / Fortschritt ---------- */
+$("#btnDatei").onclick = async () => {
+  try { toast("Datei-Auswahl ist geöffnet (evtl. hinter dem Browser) …"); const r = await api("/api/datei_waehlen", {}); if (r.pfad) { $("#eingabe").value = r.pfad; toast("Datei gewählt."); } else toast("Keine Datei gewählt."); }
+  catch (e) { toast(esc(e.message), true); }
+};
+$("#formAnalyse").onsubmit = async ev => {
+  ev.preventDefault();
+  const mehrere = !$("#listeZeile").hidden ? $("#eingabeListe").value.split("\n").map(x => x.trim()).filter(Boolean) : [];
+  const eingaben = mehrere.length ? mehrere : [$("#eingabe").value.trim()].filter(Boolean);
+  if (!eingaben.length) return toast("Bitte einen YouTube-Link einfügen oder eine Datei wählen.", true);
+  const optionen = {trennen: $("#oTrennen").checked, vier_spuren: $("#oVier").checked, sprecher: $("#oSprecher").checked, sprecher_anzahl: parseInt($("#oAnzahl").value) || null,
+    modell: $("#oModell").value, sprache: $("#oSprache").value, gemini: $("#oGemini").checked,
+    qualitaet: $("#oQualitaet").value, untertitel: $("#oUntertitel").checked,
+    einzelbilder: $("#oEinzel").checked, bild_abstand: $("#oAbstand").value.trim() || "1", nur_bilder: $("#oNurBilder").checked};
+  try { await api("/api/analyse", {eingaben, optionen}); $("#startHilfe").hidden = true; beobachten(); }
+  catch (e) { toast(esc(e.message), true); }
+};
+$("#btnMehrere").onclick = () => {
+  const z = $("#listeZeile"); z.hidden = !z.hidden; $("#btnMehrere").classList.toggle("p", !z.hidden);
+  if (!z.hidden) { if (!$("#eingabeListe").value && $("#eingabe").value.trim()) $("#eingabeListe").value = $("#eingabe").value.trim() + "\n"; $("#eingabeListe").focus(); }
+};
+async function nurLaden(art) {
+  const eingabe = $("#eingabe").value.trim();
+  if (!eingabe) return toast("Bitte zuerst oben einen YouTube-Link einfügen.", true);
+  try {
+    toast("Ordner-Auswahl ist geöffnet (evtl. hinter dem Programmfenster) …");
+    const r = await api("/api/laden", {eingabe, art, qualitaet: $("#oQualitaet").value});
+    if (r.abgebrochen) return toast("Speichern abgebrochen.");
+    $("#startHilfe").hidden = true; beobachten();
+  } catch (e) { toast(esc(e.message), true); }
+}
+$("#btnNurVideo").onclick = () => nurLaden("video");
+$("#btnNurAudio").onclick = () => nurLaden("audio");
+$("#oAbstand").oninput = () => $("#oEinzel").checked = true;
+$("#oNurBilder").onchange = () => { if ($("#oNurBilder").checked) $("#oEinzel").checked = true; };
+function beobachten() {
+  $("#laufKarte").hidden = false; $("#btnStart").disabled = true; LAEUFT = true;
+  clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    let s; try { s = await api("/api/status"); } catch { return; }
+    const f = s.fortschritt; if (!f) return;
+    const laden = ["laden", "upload", "nightcut"].includes(s.art), q = s.schlange, was = {upload: "Upload", nightcut: "nightcut", laden: "Download"}[s.art] || "Analyse";
+    const teil = q && q.gesamt > 1 && q.nr ? ` (Video ${q.nr} von ${q.gesamt})` : "";
+    $("#laufTitel").textContent = (f.fehler ? was + " abgebrochen" : (f.fertig ? was + " fertig" : was + " läuft")) + teil;
+    $("#laufSchritt").textContent = f.fehler ? "Fehler: " + f.fehler : (f.fertig ? "Fertig" : f.schritt);
+    $("#laufBalken").style.width = Math.round((f.prozent || 0) * 100) + "%";
+    $("#schritte").innerHTML = s.schritte.map(n => `<div class="schritt ${esc(f.status[n])}"><span class="punkt"></span><span>${esc(n)}</span><span class="muted" style="font-size:12px">${f.status[n] === "offen" ? "" : esc(f.status[n])}</span></div>`).join("");
+    const log = $("#log"); log.innerHTML = f.meldungen.map(([t, m]) => `<div><span class="muted">${esc(t)}</span> ${esc(m)}</div>`).join(""); log.scrollTop = log.scrollHeight;
+    if (!s.laeuft && f.fertig) {
+      clearInterval(pollTimer); $("#btnStart").disabled = false; LAEUFT = false;
+      if (laden) return f.fehler ? toast(was + " abgebrochen: " + esc(f.fehler), true) : toast(esc(s.meldung || "Gespeichert.").replace(/(https:\/\/youtu\.be\/[\w-]+)/, '<a href="$1" target="_blank" rel="noopener">$1</a>'));
+      if (q && q.gesamt > 1) {
+        const letzte = q.fertig[q.fertig.length - 1];
+        if (letzte) await oeffnen(letzte);
+        return toast(`${q.fertig.length} von ${q.gesamt} Videos analysiert.` + (q.fehler.length ? "<br>Fehler:<br>" + q.fehler.map(esc).join("<br>") : "") + (q.fertig.length > 1 ? "<br>Alle stehen unter Verlauf." : ""), q.fehler.length > 0);
+      }
+      if (f.fehler) toast("Analyse abgebrochen: " + esc(f.fehler), true);
+      else { await oeffnen(s.ordner); toast("Analyse fertig."); }
+    }
+  }, 900);
+}
+
+/* ---------- Ergebnis anzeigen ---------- */
+async function oeffnen(ordner) {
+  try { E = await api("/api/ergebnis?ordner=" + encodeURIComponent(ordner)); }
+  catch (e) { return toast("Konnte Analyse nicht laden: " + esc(e.message), true); }
+  AKTIV_ORDNER = ordner;
+  $("#startHilfe").hidden = true;
+  const nurBilder = E.analyse_art === "nur Bilder";
+  bAnsicht = nurBilder && E.einzelbilder ? "einzel" : "szenen"; bGezeigt = 120;
+  zeigeSeitenleiste(); zeigeUebersicht(); zeigeStruktur(); zeigeTranskript(); zeigeBilder(); zeigeAudio(); zeigeSchnitt(); zeigeExport();
+  zeigeTab(nurBilder ? "bilder" : "uebersicht");
+}
+function zeigeSeitenleiste() {
+  const i = E.info, k = E.kennzahlen;
+  $("#videoKarte").hidden = $("#metaKarte").hidden = $("#zahlenKarte").hidden = $("#kapitelKarte").hidden = false;
+  $("#player").src = datei(E.video_datei);
+  if (i.vorschaubild) $("#player").poster = datei(i.vorschaubild.split(/[\\/]/).pop());
+  $("#videoTitel").innerHTML = `<b>${esc(i.title)}</b>`;
+  const zeilen = [["Kanal", i.uploader || "–"], ["Länge", hms(k.dauer)], ["Quelle", i.quelle === "youtube" ? `<a href="${esc(i.webpage_url)}" target="_blank" rel="noopener">YouTube öffnen</a>` : "eigene Datei"],
+    ["Hochgeladen", i.upload_date ? `${i.upload_date.slice(6)}.${i.upload_date.slice(4,6)}.${i.upload_date.slice(0,4)}` : "–"],
+    ["Aufrufe", i.view_count != null ? Number(i.view_count).toLocaleString("de-DE") : "–"], ["Sprache", E.sprache || "–"], ["Analyse", E.analyse_art]];
+  $("#meta").innerHTML = zeilen.map(([a, b]) => `<dt>${a}</dt><dd>${a === "Quelle" ? b : esc(b)}</dd>`).join("");
+  $("#zahlen").innerHTML = [[E.sprecher.length, "Sprecher"], [E.kapitel.length, "Kapitel"], [E.bild.szenen.length, "Szenen"], [k.wpm, "Wörter/Min."],
+    [k.schnitte_pro_minute, "Schnitte/Min."], [Math.round(k.sprechanteil) + " %", "Sprechanteil"]]
+    .map(([a, b]) => `<div class="zahl"><b>${esc(a)}</b><span>${b}</span></div>`).join("");
+  $("#kapitelMini").innerHTML = E.kapitel.map(c => `<div class="verlauf-zeile klick" style="cursor:pointer" data-s="${c.start}"><span><span class="tc">${hms(c.start)}</span> ${esc(c.titel)}</span><span class="phase">${esc(c.phase)}</span></div>`).join("");
+  $$("#kapitelMini [data-s]").forEach(el => el.onclick = () => springe(+el.dataset.s));
+}
+function zeigeUebersicht() {
+  const z = E.zusammenfassung, k = E.kennzahlen;
+  const arten = Object.entries(E.bild.bildarten);
+  const balken = arten.map(([a, s], i) => `<div style="width:${100 * s / k.dauer}%;background:${BILDFARBEN[i % 7]}" title="${esc(a)}"></div>`).join("");
+  const leg = arten.map(([a, s], i) => `<span><i style="background:${BILDFARBEN[i % 7]}"></i>${esc(a)} · ${hms(s)} (${Math.round(100 * s / k.dauer)} %)</span>`).join("");
+  const sp = E.sprecher.map(s => `<div style="width:${s.anteil}%;background:${spFarbe(s.sprecher)}"></div>`).join("");
+  const spLeg = E.sprecher.map(s => `<span><i style="background:${spFarbe(s.sprecher)}"></i>${esc(s.sprecher)}${s.rolle ? " – " + esc(s.rolle) : ""}: ${s.anteil} % · ${s.woerter} Wörter</span>`).join("");
+  const abschnitt = (titel, obj) => obj && Object.keys(obj).length ? `<div class="karte"><h3>${titel}</h3>${Object.entries(obj).map(([a, b]) => `<p style="margin:0 0 8px"><b>${esc(a.replace(/_/g, " ").replace(/^./, c => c.toUpperCase()))}:</b> ${esc(b)}</p>`).join("")}</div>` : "";
+  $("#t-uebersicht").innerHTML = `
+    <h2>${esc(E.info.title)}</h2>
+    <p class="unter">${esc(E.tempo)} ${E.musikanteil != null ? `Hintergrund/Musik: ${E.musikanteil} % der Tonenergie.` : ""}</p>
+    ${E.analyse_art === "nur Bilder" ? `<div class="hinweis">Nur Bilder: Ton, Transkript und KI-Auswertung wurden übersprungen. Die Bilder stehen im Reiter <b>Bilder</b>. Für die volle Analyse „Nur Bilder“ oben abschalten und neu analysieren.</div>` : E.analyse_art.includes("Gemini") ? "" : `<div class="hinweis">Lokale Analyse ohne KI: Zusammenfassung ist ein Auszug der wichtigsten Sätze, Bildarten sind automatisch geschätzt. Für ausführliche Zusammenfassung und echte Bildbeschreibungen den kostenlosen Gemini-Schlüssel unter <b>Verlauf &amp; Einstellungen</b> eintragen und neu analysieren.</div>`}
+    <div class="raster2">
+      <div class="karte"><h3>Zusammenfassung</h3><p class="prosa" style="margin:0">${esc(z.kurz || "–")}</p>
+        ${z.ausfuehrlich ? `<p class="prosa">${esc(z.ausfuehrlich)}</p>` : ""}
+        ${z.thema ? `<p style="margin:8px 0 0"><b>Thema:</b> ${esc(z.thema)}</p>` : ""}${z.zielgruppe ? `<p style="margin:4px 0 0"><b>Zielgruppe:</b> ${esc(z.zielgruppe)}</p>` : ""}</div>
+      <div class="karte"><h3>${E.analyse_art.includes("Gemini") ? "Kernaussagen" : "Wichtigste Sätze"}</h3><ul class="punkte">${(z.kernaussagen || []).map(x => `<li>${esc(x)}</li>`).join("") || "<li>–</li>"}</ul>
+        <p style="margin:10px 0 0"><b>Schlagwörter:</b> ${E.schlagwoerter.map(w => `<span class="kchip">${esc(w)}</span>`).join("")}</p></div>
+      <div class="karte"><h3>Was ist zu sehen?</h3><div class="balken">${balken}</div><div class="legende">${leg}</div>
+        <p class="muted" style="font-size:13px;margin:8px 0 0">${E.bild.schnitte.length} Schnitte/Folienwechsel, ${(E.bild.einblendungen || []).length} kleinere Einblendungen, mittlere Szenenlänge ${E.bild.mittlere_szenenlaenge} s.</p></div>
+      <div class="karte"><h3>Wer spricht?</h3><div class="balken">${sp}</div><div class="legende" style="flex-direction:column">${spLeg}</div>
+        <p class="muted" style="font-size:13px;margin:8px 0 0">${k.woerter} Wörter, ${k.lange_pausen} lange Pausen, ${k.fuellwoerter} Füllwörter (ähm/äh).</p></div>
+      ${abschnitt("Darstellung", E.darstellung)}${abschnitt("Dramaturgie", E.dramaturgie)}
+      ${E.titel_vorschlaege ? `<div class="karte"><h3>Titel-Vorschläge</h3><ul class="punkte">${E.titel_vorschlaege.map(t => `<li>${esc(t)}</li>`).join("")}</ul></div>` : ""}
+      ${E.verbesserungen ? `<div class="karte"><h3>Verbesserungsideen</h3><ul class="punkte">${E.verbesserungen.map(t => `<li>${esc(t)}</li>`).join("")}</ul></div>` : ""}
+    </div>`;
+}
+function zeigeStruktur() {
+  const zeilen = E.kapitel.map((c, i) => `<tr class="klick" data-i="${i}">
+      <td><span class="tc">${hms(c.start)}</span><br><span class="muted" style="font-size:12px">bis ${hms(c.ende)}</span></td>
+      <td><span class="phase">${esc(c.phase)}</span></td>
+      <td style="min-width:220px"><textarea class="titelfeld" rows="2" data-feld="titel" data-i="${i}" aria-label="Kapiteltitel">${esc(c.titel)}</textarea><div>${(c.schlagwoerter || []).map(w => `<span class="kchip">${esc(w)}</span>`).join("")}</div></td>
+      <td style="min-width:260px">${esc(c.inhalt || (c.text.length > 260 ? c.text.slice(0, 260) + " …" : c.text) || "–")}</td>
+      <td style="min-width:200px">${c.bild ? `<img class="daumen" src="${datei("bilder/" + c.bild)}" alt="Standbild">` : ""}<div style="font-size:13px;margin-top:4px">${esc(c.visuell || c.bildart)}</div></td>
+      <td class="mono" style="font-size:13px">${c.wpm} W/Min<br>${c.szenen} Szenen<br>${(c.sprecher || []).map(esc).join("<br>")}</td></tr>`).join("");
+  const hinweise = E.kapitel_hinweise?.length ? E.kapitel_hinweise.map(h => `<div class="hinweis">${esc(h)}</div>`).join("") : `<div class="hinweis ok">Kapitel erfüllen die YouTube-Regeln (Start 0:00, mindestens 3, jeweils mindestens 10 Sekunden).</div>`;
+  $("#t-struktur").innerHTML = `
+    <h2>Strukturplan</h2><p class="unter">Quelle der Kapitel: ${esc(E.kapitel_quelle)}. Zeile anklicken springt im Video an die Stelle. Titel sind bearbeitbar.</p>
+    ${hinweise}
+    <div class="tabelle"><table><thead><tr><th>Zeit</th><th>Phase</th><th>Kapitel</th><th>Inhalt</th><th>Bild / Darstellung</th><th>Tempo</th></tr></thead><tbody>${zeilen}</tbody></table></div>
+    <div class="karte" style="margin-top:14px"><h3>YouTube-Kapitel für die Beschreibung</h3>
+      <div class="ausgabe" id="ytKapitel">${esc(E.kapitel.map(c => hms(c.start) + " " + c.titel).join("\n"))}</div>
+      <div class="reihe" style="margin-top:8px"><button class="btn klein" id="kapKopieren">Kopieren</button><button class="btn klein" id="kapSpeichern">Titeländerungen übernehmen</button><button class="btn klein" id="kapMd">Strukturplan speichern (.md)</button></div></div>`;
+  $$("#t-struktur tr.klick").forEach(tr => tr.onclick = ev => { if (ev.target.tagName !== "TEXTAREA") springe(E.kapitel[+tr.dataset.i].start); });
+  $$("#t-struktur [data-feld]").forEach(inp => inp.oninput = () => { E.kapitel[+inp.dataset.i].titel = inp.value; $("#ytKapitel").textContent = E.kapitel.map(c => hms(c.start) + " " + c.titel).join("\n"); });
+  $("#kapKopieren").onclick = () => kopieren($("#ytKapitel").textContent);
+  $("#kapSpeichern").onclick = async () => { try { const r = await api("/api/kapitel", {ordner: AKTIV_ORDNER, kapitel: E.kapitel}); E.kapitel_hinweise = r.hinweise; zeigeSeitenleiste(); toast("Kapitel gespeichert."); } catch (e) { toast(esc(e.message), true); } };
+  $("#kapMd").onclick = () => speichern(["export/strukturplan.md"]);
+}
+let tFilter = "", tSprecher = "";
+function zeigeTranskript() {
+  const sprecher = E.sprecher.map(s => s.sprecher);
+  $("#t-transkript").innerHTML = `
+    <h2>Transkript</h2><p class="unter">${E.zeilen.length} Zeilen mit Zeitstempeln. Zeitstempel anklicken springt im Video dorthin.</p>
+    <div class="werkzeug">
+      <input type="search" id="tSuche" placeholder="Im Transkript suchen …" aria-label="Im Transkript suchen">
+      <select id="tSp" class="btn klein"><option value="">Alle Sprecher</option>${sprecher.map(s => `<option>${esc(s)}</option>`).join("")}</select>
+      <button class="btn klein" data-dl="export/transkript.srt">Untertitel .srt</button>
+      <button class="btn klein" data-dl="export/transkript.vtt">Untertitel .vtt</button>
+      <button class="btn klein" data-dl="export/transkript.txt">Text .txt</button>
+      ${E.exporte["transkript.docx"] ? `<button class="btn klein" data-dl="export/transkript.docx">Word .docx</button>` : ""}
+      ${E.exporte["transkript.pdf"] ? `<button class="btn klein" data-dl="export/transkript.pdf">PDF</button>` : ""}
+      ${sprecher.map(s => `<button class="btn klein" data-dl="export/transkript_${spDatei(s)}.txt">Nur ${esc(s)}</button>`).join("")}
+      <button class="btn klein" id="tKopieren">Alles kopieren</button>
+    </div>
+    ${E.zeilen.length ? `<div class="karte" style="margin:0 0 12px"><h3>Bearbeiten und übersetzen</h3>
+      <div class="reihe" style="align-items:center">
+        <button class="btn klein${tBearbeiten ? " p" : ""}" id="tEdit">${tBearbeiten ? "Änderungen speichern" : "Text korrigieren"}</button>
+        ${tBearbeiten ? `<button class="btn klein" id="tAbbruch">Abbrechen</button><span class="muted">Text in der Liste anklicken und ändern.</span>` : ""}
+      </div>
+      <div class="reihe" style="align-items:center;margin-top:10px">${sprecher.map((s, i) => `<label><span class="sp" style="color:${spFarbe(s)}">${esc(s)}</span> heißt <input class="tName" data-alt="${esc(s)}" value="${esc(s)}" maxlength="40" style="width:150px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:3px 8px"></label>`).join("")}
+        <button class="btn klein" id="tNamen">Sprecher umbenennen</button></div>
+      <div class="reihe" style="align-items:center;margin-top:10px"><label>Übersetzen nach <select id="tSprache" class="btn klein">${[["en","Englisch"],["tr","Türkisch"],["de","Deutsch"],["fr","Französisch"],["es","Spanisch"],["it","Italienisch"],["pl","Polnisch"],["ru","Russisch"],["ar","Arabisch"],["uk","Ukrainisch"],["nl","Niederländisch"],["pt","Portugiesisch"]].map(([k, n]) => `<option value="${k}">${n}</option>`).join("")}</select></label>
+        <button class="btn klein" id="tUebersetzen">Übersetzen (Gemini)</button>
+        ${Object.keys(E.uebersetzungen || {}).map(k => `<button class="btn klein" data-dl="export/uebersetzung_${esc(k)}.srt">Untertitel ${esc(k.toUpperCase())} .srt</button><button class="btn klein" data-dl="export/uebersetzung_${esc(k)}.txt">Text ${esc(k.toUpperCase())} .txt</button>`).join("")}</div>
+    </div>` : ""}
+    <div class="tabelle" id="tListe" style="max-height:70vh;overflow:auto"></div>`;
+  $("#tSuche").oninput = e => { tFilter = e.target.value.toLowerCase(); listeTranskript(); };
+  $("#tSp").onchange = e => { tSprecher = e.target.value; listeTranskript(); };
+  $$("#t-transkript [data-dl]").forEach(b => b.onclick = () => speichern([b.dataset.dl]));
+  $("#tKopieren").onclick = () => kopieren(E.zeilen.map(z => `[${hms(z.start)}] ${z.sprecher}: ${z.text}`).join("\n"));
+  listeTranskript();
+  if (!E.zeilen.length) return;
+  const neuLaden = (e, text) => { E = e; tBearbeiten = false; zeigeSeitenleiste(); zeigeUebersicht(); zeigeStruktur(); zeigeTranskript(); zeigeAudio(); zeigeSchnitt(); zeigeExport(); toast(text); };
+  $("#tEdit").onclick = async () => {
+    if (!tBearbeiten) { tBearbeiten = true; tFilter = ""; tSprecher = ""; return zeigeTranskript(); }
+    const texte = {};
+    $$("#tListe .tx").forEach(el => { const i = +el.parentElement.dataset.i, t = el.textContent.replace(/\s+/g, " ").trim(); if (t && t !== E.zeilen[i].text) texte[i] = t; });
+    if (!Object.keys(texte).length) { tBearbeiten = false; zeigeTranskript(); return toast("Nichts geändert."); }
+    try { const e = await api("/api/transkript", {ordner: AKTIV_ORDNER, texte}); neuLaden(e, `${e._geaendert.zeilen} Zeile(n) geändert. Alle Ausgaben wurden neu geschrieben.`); }
+    catch (e) { toast(esc(e.message), true); }
+  };
+  if ($("#tAbbruch")) $("#tAbbruch").onclick = () => { tBearbeiten = false; zeigeTranskript(); };
+  $("#tNamen").onclick = async () => {
+    const namen = {}; $$("#t-transkript .tName").forEach(i => { if (i.value.trim() && i.value.trim() !== i.dataset.alt) namen[i.dataset.alt] = i.value.trim(); });
+    if (!Object.keys(namen).length) return toast("Bitte zuerst einen neuen Namen eintragen.", true);
+    try { const e = await api("/api/transkript", {ordner: AKTIV_ORDNER, namen}); neuLaden(e, `${e._geaendert.sprecher} Sprecher umbenannt. Alle Ausgaben wurden neu geschrieben.`); }
+    catch (e) { toast(esc(e.message), true); }
+  };
+  $("#tUebersetzen").onclick = async () => {
+    const b = $("#tUebersetzen"), sprache = $("#tSprache").value; b.disabled = true; b.textContent = "Übersetze …";
+    try { const e = await api("/api/uebersetzen", {ordner: AKTIV_ORDNER, sprache}); neuLaden(e, "Übersetzung fertig. Sie liegt als .srt und .txt hier und im Reiter Export."); }
+    catch (e) { toast("Übersetzung nicht möglich: " + esc(e.message), true); b.disabled = false; b.textContent = "Übersetzen (Gemini)"; }
+  };
+}
+function listeTranskript() {
+  const markiere = t => tFilter ? esc(t).replace(new RegExp(tFilter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), m => `<mark>${m}</mark>`) : esc(t);
+  const z = E.zeilen.filter(x => (!tSprecher || x.sprecher === tSprecher) && (!tFilter || x.text.toLowerCase().includes(tFilter)));
+  $("#tListe").innerHTML = z.map(x => `<div class="tz" data-s="${x.start}" data-i="${E.zeilen.indexOf(x)}"><span class="tc" style="cursor:pointer">${hms(x.start)}–${hms(x.ende)}</span><span class="sp" style="color:${spFarbe(x.sprecher)}">${esc(x.sprecher)}</span><span class="tx"${tBearbeiten ? ` contenteditable="plaintext-only" spellcheck="true" style="outline:1px dashed var(--acc-d);border-radius:4px;padding:0 4px"` : ""}>${markiere(x.text)}</span></div>`).join("") || `<div class="leer">Keine Treffer.</div>`;
+  $$("#tListe .tc").forEach(el => el.onclick = () => springe(+el.parentElement.dataset.s));
+}
+$("#player").ontimeupdate = () => {
+  if (!E || !$("#t-transkript").classList.contains("akt")) return;
+  const t = $("#player").currentTime;
+  const akt = E.zeilen.find(z => z.start <= t && t <= z.ende + 0.3);
+  $$("#tListe .tz").forEach(el => el.classList.toggle("aktiv", !!akt && +el.dataset.s === akt.start));
+};
+let bAnsicht = "szenen", bGezeigt = 120, tBearbeiten = false;
+const spDatei = s => s.trim().toLowerCase().replace(/[^\p{L}\p{N}_-]+/gu, "_").replace(/^_+|_+$/g, "") || "sprecher";
+async function alsThumbnail(bild) {
+  try { const r = await api("/api/thumbnail", {ordner: AKTIV_ORDNER, bild}); E.thumbnail = r.thumbnail; zeigeExport(); toast("Als Thumbnail gespeichert (1280 × 720). Zu finden im Reiter Export."); }
+  catch (e) { toast(esc(e.message), true); }
+}
+const komma = x => String(x).replace(".", ",");
+const hmsGenau = t => { t = Math.round(t * 100) / 100; const r = Math.round(t % 1 * 100); return hms(t) + (r ? "," + String(r).padStart(2, "0").replace(/0$/, "") : ""); };
+const ebZeit = (eb, i) => eb.zeiten ? eb.zeiten[i] : i * eb.abstand;
+const ebText = eb => (eb.modus === "szenen" ? "eines pro Szenenwechsel" : `eines alle ${komma(eb.abstand)} Sekunden`)
+  + (eb.ganz === false ? `, von ${hmsGenau(eb.von)} bis ${hmsGenau(eb.bis)}` : "") + `, ${(eb.format || "jpg").toUpperCase()}, `
+  + (eb.breite ? `${eb.breite} Pixel breit` : "in der Auflösung des Videos");
+function zeigeBilder() {
+  const eb = E.einzelbilder, n = eb ? eb.anzahl : 0;
+  const szenen = `<p class="unter">${E.bild.szenen.length} Szenen mit je einem Standbild. ${E.analyse_art.includes("Gemini") ? "Beschreibungen von Gemini." : "Bildart automatisch geschätzt (ohne KI)."} Klick springt im Video zur Szene.</p>
+    <div class="galerie">${E.bild.szenen.map(s => `<div class="bild" data-s="${s.start}"><img loading="lazy" src="${datei("bilder/" + s.bild)}" alt="Standbild ${s.nr}">
+      <div><span class="tc">${hms(s.start)}–${hms(s.ende)}</span> <span class="muted">· Szene ${s.nr}</span><b>${esc(s.bildtyp || s.bildart)}</b>
+      ${s.beschreibung ? `<span>${esc(s.beschreibung)}</span>` : ""}${s.text_im_bild ? `<div class="muted" style="padding:4px 0 0;font-size:12.5px">Text im Bild: ${esc(s.text_im_bild)}</div>` : ""}
+      <button class="btn klein" style="margin-top:6px" data-th="bilder/${esc(s.bild)}">Als Thumbnail</button></div></div>`).join("")}</div>`;
+  const einzel = eb ? `<p class="unter">${n} Einzelbilder, ${ebText(eb)} (${komma(eb.mb)} MB). Klick springt im Video an die Stelle.</p>
+    ${(eb.kontaktbogen || []).map((k, i) => `<img loading="lazy" src="${datei("einzelbilder/" + k)}&v=${eb.anzahl}-${eb.mb}" alt="Kontaktbogen Blatt ${i + 1}" style="width:100%;border:1px solid var(--line);border-radius:8px;margin:0 0 12px">`).join("")}
+    <div class="galerie einzel">${eb.bilder.slice(0, bGezeigt).map((b, i) => `<div class="bild" data-s="${ebZeit(eb, i)}"><img loading="lazy" src="${datei("einzelbilder/" + b)}" alt="Einzelbild ${i + 1}">
+      <div><span class="tc">${hmsGenau(ebZeit(eb, i))}</span> <span class="muted">· Bild ${i + 1}</span>
+      <button class="btn klein" style="margin-top:6px;display:block" data-th="einzelbilder/${esc(b)}">Als Thumbnail</button></div></div>`).join("")}</div>
+    ${n > bGezeigt ? `<div class="reihe" style="margin-top:14px"><button class="btn" id="ebMehr">Weitere anzeigen (noch ${n - bGezeigt})</button></div>` : ""}`
+    : `<div class="leer">Noch keine Einzelbilder. Oben den Abstand eintragen und auf <b>Zerlegen</b> klicken.</div>`;
+  $("#t-bilder").innerHTML = `
+    <h2>Bilder im Video</h2>
+    <div class="karte" style="margin:10px 0 14px"><h3>Video in Einzelbilder zerlegen</h3>
+      <div class="reihe" style="align-items:center">
+        <select id="ebModus" class="btn klein" aria-label="Art der Zerlegung"><option value="abstand">Ein Bild alle … Sekunden</option><option value="szenen"${eb && eb.modus === "szenen" ? " selected" : ""}>Ein Bild pro Szenenwechsel</option></select>
+        <span id="ebAbstandTeil"><input id="ebAbstand" class="kurz" type="text" inputmode="decimal" autocomplete="off" aria-label="Abstand in Sekunden" value="${esc(eb && eb.abstand ? komma(eb.abstand) : $("#oAbstand").value)}"> <span>Sekunden <span class="muted">(1 bis 10, auch 1,5)</span></span></span>
+        <label>von <input id="ebVon" class="kurz" type="text" autocomplete="off" placeholder="0:00" value="${eb && eb.ganz === false ? esc(hmsGenau(eb.von)) : ""}"></label>
+        <label>bis <input id="ebBis" class="kurz" type="text" autocomplete="off" placeholder="Ende" value="${eb && eb.ganz === false ? esc(hmsGenau(eb.bis)) : ""}"></label>
+        <label>Format <select id="ebFormat" class="btn klein"><option value="jpg">JPG</option><option value="png"${eb && eb.format === "png" ? " selected" : ""}>PNG</option></select></label>
+        <label>Größe <select id="ebBreite" class="btn klein">${[["", "wie Video"], ["1920", "1920 breit"], ["1280", "1280 breit"], ["854", "854 breit"], ["640", "640 breit"], ["320", "320 breit"]].map(([w, t]) => `<option value="${w}"${eb && String(eb.breite || "") === w ? " selected" : ""}>${t}</option>`).join("")}</select></label>
+        <button class="btn p klein" id="ebStart">${eb ? "Neu zerlegen" : "Zerlegen"}</button>
+      </div>
+      ${eb ? `<div class="reihe" style="margin-top:10px"><button class="btn klein" id="ebOrdner">Alle ${n} in einen Ordner speichern</button><button class="btn klein" id="ebZip">Alle ${n} als ZIP speichern</button>
+        <button class="btn klein" id="ebBogen" title="Alle Einzelbilder klein auf Übersichtsblättern, mit der Zeit unter jedem Bild.">${eb.kontaktbogen ? "Kontaktbogen neu erstellen" : "Kontaktbogen erstellen"}</button>
+        ${eb.kontaktbogen ? `<button class="btn klein" id="ebBogenSpeichern">Kontaktbogen speichern (${eb.kontaktbogen.length} ${eb.kontaktbogen.length === 1 ? "Blatt" : "Blätter"})</button>` : ""}</div>` : ""}
+      </div>
+    <div class="werkzeug"><button class="btn klein${bAnsicht === "szenen" ? " p" : ""}" id="bSzenen">Szenen (${E.bild.szenen.length})</button><button class="btn klein${bAnsicht === "einzel" ? " p" : ""}" id="bEinzel">Einzelbilder (${n})</button>
+      ${bAnsicht === "szenen" ? `<button class="btn klein" id="bAlle">Alle Standbilder speichern (ZIP)</button>` : ""}</div>
+    ${bAnsicht === "einzel" ? einzel : szenen}`;
+  $$("#t-bilder .bild").forEach(el => el.onclick = () => springe(+el.dataset.s));
+  $$("#t-bilder [data-th]").forEach(b => b.onclick = ev => { ev.stopPropagation(); alsThumbnail(b.dataset.th); });
+  $("#bSzenen").onclick = () => { bAnsicht = "szenen"; zeigeBilder(); };
+  $("#bEinzel").onclick = () => { bAnsicht = "einzel"; zeigeBilder(); };
+  if ($("#bAlle")) $("#bAlle").onclick = () => speichern(E.bild.szenen.map(s => "bilder/" + s.bild), {zip: true, praefix: "Standbilder " + AKTIV_ORDNER});
+  if ($("#ebMehr")) $("#ebMehr").onclick = () => { bGezeigt += 240; zeigeBilder(); };
+  if (eb) {
+    const alle = eb.bilder.map(b => "einzelbilder/" + b);
+    $("#ebOrdner").onclick = () => speichern(alle, {unterordner: "Einzelbilder " + AKTIV_ORDNER});
+    $("#ebZip").onclick = () => speichern(alle, {zip: true, praefix: "Einzelbilder " + AKTIV_ORDNER});
+    $("#ebBogen").onclick = async () => {
+      const b = $("#ebBogen"), ordner = AKTIV_ORDNER; b.disabled = true; b.textContent = "Erstelle Kontaktbogen …";
+      try { const r = await api("/api/kontaktbogen", {ordner}); if (ordner !== AKTIV_ORDNER) return; E.einzelbilder = r; bAnsicht = "einzel"; zeigeBilder(); toast(`Kontaktbogen erstellt (${r.kontaktbogen.length} ${r.kontaktbogen.length === 1 ? "Blatt" : "Blätter"}).`); }
+      catch (e) { toast(esc(e.message), true); if ($("#ebBogen")) { $("#ebBogen").disabled = false; $("#ebBogen").textContent = "Kontaktbogen erstellen"; } }
+    };
+    if ($("#ebBogenSpeichern")) $("#ebBogenSpeichern").onclick = () => speichern(eb.kontaktbogen.map(k => "einzelbilder/" + k), eb.kontaktbogen.length > 1 ? {unterordner: "Kontaktbogen " + AKTIV_ORDNER} : {praefix: "Kontaktbogen " + AKTIV_ORDNER});
+  }
+  const modusZeigen = () => $("#ebAbstandTeil").hidden = $("#ebModus").value === "szenen";
+  $("#ebModus").onchange = modusZeigen; modusZeigen();
+  const start = async () => {
+    const b = $("#ebStart"), ordner = AKTIV_ORDNER; b.disabled = true; b.textContent = "Zerlege …";
+    try {
+      const r = await api("/api/einzelbilder", {ordner, abstand: $("#ebAbstand").value, modus: $("#ebModus").value, von: $("#ebVon").value, bis: $("#ebBis").value,
+        format: $("#ebFormat").value, breite: $("#ebBreite").value});
+      if (ordner !== AKTIV_ORDNER) return;
+      E.einzelbilder = r; bAnsicht = "einzel"; bGezeigt = 120; zeigeBilder(); toast(`${r.anzahl} Einzelbilder erzeugt (${ebText(r)}).`);
+    } catch (e) { toast(esc(e.message), true); if ($("#ebStart")) { $("#ebStart").disabled = false; $("#ebStart").textContent = eb ? "Neu zerlegen" : "Zerlegen"; } }
+  };
+  $("#ebStart").onclick = start;
+  $("#ebAbstand").onkeydown = ev => { if (ev.key === "Enter") start(); };
+}
+function zeigeAudio() {
+  const karten = Object.entries(E.audio).map(([name, pfad]) => `<div class="karte audio"><h3>${esc(name)}</h3>
+      <audio controls preload="metadata" src="${datei(pfad)}"></audio>
+      <div class="reihe"><button class="btn klein p" data-a="${esc(pfad)}" data-f="original">Speichern (.wav)</button><button class="btn klein" data-a="${esc(pfad)}" data-f="mp3">Speichern (.mp3)</button></div></div>`).join("");
+  const alle = Object.values(E.audio);
+  $("#t-audio").innerHTML = `
+    <h2>Audio</h2><p class="unter">Original, getrennte Spuren und jede Stimme einzeln. Ein Klick speichert, der Zielordner wird jedes Mal abgefragt.</p>
+    ${E.musikanteil == null ? `<div class="hinweis">Stimme und Musik wurden bei dieser Analyse nicht getrennt. Option oben einschalten und neu analysieren.</div>` : ""}
+    <div class="werkzeug"><button class="btn klein" id="aAlleWav">Alle als .wav speichern</button><button class="btn klein" id="aAlleMp3">Alle als .mp3 speichern</button></div>
+    <div class="audios">${karten}</div>`;
+  $$("#t-audio [data-a]").forEach(b => b.onclick = () => speichern([b.dataset.a], {format: b.dataset.f}));
+  $("#aAlleWav").onclick = () => speichern(alle, {format: "original"});
+  $("#aAlleMp3").onclick = () => speichern(alle, {format: "mp3"});
+}
+function zeigeSchnitt() {
+  const kap = E.kapitel || [], hatText = (E.zeilen || []).length > 0, hatStimme = E.musikanteil != null;
+  const aus = (ok, grund) => ok ? "" : ` disabled title="${grund}"`;
+  $("#t-schnitt").innerHTML = `
+    <h2>Schnitt</h2><p class="unter">Neue Videos aus dieser Analyse. Das Original bleibt unverändert. Bei langen Videos dauert ein Schnitt einige Minuten.</p>
+    <div class="karte"><h3>Clips ausschneiden</h3>
+      <div id="sKapitel">${kap.map((k, i) => `<label style="display:flex;gap:8px;align-items:center;padding:2px 0;cursor:pointer"><input type="checkbox" data-k="${i}"><span class="tc">${hms(k.start)}–${hms(k.ende)}</span><span>${esc(k.titel)}</span></label>`).join("") || `<span class="muted">Keine Kapitel vorhanden.</span>`}</div>
+      <div class="reihe" style="margin-top:10px;align-items:center"><button class="btn klein" id="sHighlights"${aus(hatText, "Braucht ein Transkript")}>Highlights finden (Gemini)</button><span class="muted">Schlägt die stärksten Stellen des Videos als Clips vor.</span></div>
+      <div id="sHigh">${(E.highlights || []).map((h, i) => `<label style="display:flex;gap:8px;align-items:baseline;padding:2px 0;cursor:pointer"><input type="checkbox" data-h="${i}" checked><span class="tc">${hms(h.start)}–${hms(h.ende)}</span><span><b>${esc(h.titel)}</b> <span class="muted">${esc(h.grund)}</span></span></label>`).join("")}</div>
+      <div class="reihe" style="margin-top:10px"><label>Eigener Bereich von <input id="sVon" class="kurz" placeholder="0:30" autocomplete="off"> bis <input id="sBis" class="kurz" placeholder="1:15" autocomplete="off"></label>
+        <label><input type="checkbox" id="sHoch"> Hochformat 9:16 (Shorts)</label></div>
+      <div class="reihe" style="margin-top:10px"><button class="btn p" id="sClips">Ausschneiden</button>${kap.length ? `<button class="btn klein" id="sAlle">Alle Kapitel wählen</button>` : ""}</div></div>
+    <div class="karte"><h3>Ganzes Video bearbeiten</h3>
+      <div class="werkzeug">
+        <button class="btn" data-s="stille"${aus(hatText, "Braucht ein Transkript")}>Sprechpausen entfernen</button>
+        <button class="btn" data-s="ohne_musik"${aus(hatStimme, "Braucht eine Analyse mit getrennter Stimme")}>Video ohne Musik</button>
+        <button class="btn" data-s="lautstaerke">Lautstärke angleichen</button>
+        <button class="btn" data-s="untertitel"${aus(hatText, "Braucht ein Transkript")}>Untertitel einbrennen</button>
+      </div>
+      <label style="display:flex;gap:6px;align-items:center;font-size:13.5px"><input type="checkbox" id="sSprecher"> Untertitel mit Sprechernamen</label></div>
+    <div class="karte"><h3>Fertige Videos</h3><div id="sListe"><span class="muted">Noch nichts geschnitten.</span></div></div>`;
+  const liste = dateien => {
+    $("#sListe").innerHTML = dateien.length ? dateien.map(p => `<div class="verlauf-zeile"><span class="mono">${esc(p.split("/").pop())}</span>
+      <span class="reihe"><a class="btn klein" style="text-decoration:none;color:inherit" href="${datei(p)}" target="_blank" rel="noopener">Ansehen</a><button class="btn klein p" data-v="${esc(p)}">Speichern</button></span></div>`).join("")
+      : `<span class="muted">Noch nichts geschnitten.</span>`;
+    $$("#sListe [data-v]").forEach(b => b.onclick = () => speichern([b.dataset.v]));
+  };
+  const auftrag = async body => {
+    const knoepfe = $$("#t-schnitt button"); knoepfe.forEach(b => b.dataset.war = b.disabled ? "1" : "");
+    knoepfe.forEach(b => b.disabled = true); toast("Schnitt läuft … bitte warten.");
+    try { const r = await api("/api/schnitt", {ordner: AKTIV_ORDNER, ...body}); liste(r.dateien); toast(esc(r.meldung)); }
+    catch (e) { toast("Schnitt nicht möglich: " + esc(e.message), true); }
+    finally { knoepfe.forEach(b => b.disabled = b.dataset.war === "1"); }
+  };
+  if ($("#sAlle")) $("#sAlle").onclick = () => $$("#sKapitel input").forEach(c => c.checked = true);
+  $("#sHighlights").onclick = async () => {
+    const b = $("#sHighlights"), ordner = AKTIV_ORDNER; b.disabled = true; b.textContent = "Suche Highlights …";
+    try { const r = await api("/api/highlights", {ordner}); if (ordner !== AKTIV_ORDNER) return; E.highlights = r.highlights; zeigeSchnitt(); toast(r.highlights.length ? `${r.highlights.length} Highlights gefunden. Sie sind schon angehakt.` : "Gemini hat keine passenden Stellen gefunden."); }
+    catch (e) { toast("Highlights nicht möglich: " + esc(e.message), true); b.disabled = false; b.textContent = "Highlights finden (Gemini)"; }
+  };
+  $("#sClips").onclick = () => {
+    const abschnitte = $$("#sKapitel input:checked").map(c => kap[+c.dataset.k]).map(k => ({start: k.start, ende: k.ende, titel: k.titel}));
+    $$("#sHigh input:checked").forEach(c => { const h = E.highlights[+c.dataset.h]; abschnitte.push({start: h.start, ende: h.ende, titel: h.titel}); });
+    const von = $("#sVon").value.trim(), bis = $("#sBis").value.trim();
+    if (von || bis) { if (!von || !bis) return toast("Für den eigenen Bereich bitte „von“ und „bis“ eintragen.", true); abschnitte.push({start: von, ende: bis, titel: `Clip ${von.replace(/:/g, "-")} bis ${bis.replace(/:/g, "-")}`}); }
+    if (!abschnitte.length) return toast("Bitte ein Kapitel anhaken oder einen eigenen Bereich eintragen.", true);
+    auftrag({art: "clips", abschnitte, hochformat: $("#sHoch").checked});
+  };
+  $$("#t-schnitt [data-s]").forEach(b => b.onclick = () => auftrag({art: b.dataset.s, mit_sprecher: $("#sSprecher").checked}));
+  api("/api/schnitt", {ordner: AKTIV_ORDNER, art: "liste"}).then(r => liste(r.dateien)).catch(() => {});
+}
+function zeigeExport() {
+  const liste = Object.entries(E.exporte);
+  const namen = {"transkript.srt":"Untertitel (SRT) mit Sprechern","transkript.vtt":"Untertitel (VTT) mit Sprechern","transkript.txt":"Transkript als Text mit Zeitstempeln",
+    "strukturplan.md":"Strukturplan + Zusammenfassung + Bilder (Markdown)","upload_paket.json":"Upload-Paket für den Automatischen YouTube-Upload","ergebnis.json":"Alle Daten der Analyse (JSON)",
+    "transkript.docx":"Zusammenfassung, Strukturplan und Transkript als Word-Dokument","transkript.pdf":"Zusammenfassung, Strukturplan und Transkript als PDF"};
+  const sprachen = {en:"Englisch",tr:"Türkisch",de:"Deutsch",fr:"Französisch",es:"Spanisch",it:"Italienisch",pl:"Polnisch",ru:"Russisch",ar:"Arabisch",uk:"Ukrainisch",nl:"Niederländisch",pt:"Portugiesisch"};
+  liste.forEach(([n]) => { const m = n.match(/^uebersetzung_(\w+)\.(srt|txt)$/); if (m) namen[n] = `Übersetzung ${sprachen[m[1]] || m[1]} (${m[2] === "srt" ? "Untertitel" : "Text"})`; });
+  if (E.thumbnail) liste.push(["thumbnail.jpg", E.thumbnail]), namen["thumbnail.jpg"] = "Vorschaubild für YouTube (1280 × 720)";
+  $("#t-export").innerHTML = `
+    <h2>Export</h2><p class="unter">Jede Datei einzeln oder alles zusammen speichern. Der Zielordner wird jedes Mal abgefragt.</p>
+    <div class="werkzeug"><button class="btn p" id="xAlles">Alles als ZIP speichern</button><button class="btn" id="xAllesMitAudio">Alles inkl. Audio und Bilder als ZIP</button><button class="btn" id="xOrdner">Arbeitsordner öffnen</button></div>
+    <div class="tabelle"><table><thead><tr><th>Datei</th><th>Inhalt</th><th></th></tr></thead><tbody>
+      ${liste.map(([n, p]) => `<tr><td class="mono">${esc(n)}</td><td>${esc(namen[n] || (n.startsWith("transkript_") ? "Nur die Sätze von " + n.slice(11, -4).replace(/_/g, " ").replace(/^./, c => c.toUpperCase()) : ""))}</td><td><button class="btn klein" data-x="${esc(p)}">Speichern</button></td></tr>`).join("")}
+      <tr><td class="mono">${esc(E.video_datei)}</td><td>Das heruntergeladene Video</td><td><button class="btn klein" data-x="${esc(E.video_datei)}">Speichern</button></td></tr>
+    </tbody></table></div>
+    <div class="karte" style="margin-top:14px"><h3>Auf YouTube hochladen</h3>
+      <p class="muted" id="yStand" style="margin:0 0 8px;font-size:13.5px">Prüfe die YouTube-Anmeldung …</p>
+      <div class="form" style="grid-template-columns:minmax(0,1fr)">
+        <label>Titel (höchstens 100 Zeichen)<input id="yTitel" maxlength="100" value="${esc((E.info.title || "").slice(0, 100))}"></label>
+        <label>Beschreibung<textarea id="yText" style="min-height:120px">${esc(E.kapitel && E.kapitel.length ? (E.zusammenfassung.kurz || "") + "\n\nKapitel:\n" + E.kapitel.map(k => hms(k.start) + " " + k.titel).join("\n") : (E.zusammenfassung.kurz || ""))}</textarea></label>
+        <label>Tags (mit Komma getrennt)<input id="yTags" value="${esc(((E.info.tags && E.info.tags.length ? E.info.tags : E.schlagwoerter) || []).slice(0, 15).join(", "))}"></label>
+      </div>
+      <div class="reihe" style="align-items:center;margin-top:8px">
+        <label>Video <select id="yDatei" class="btn klein"><option value="">Original (${esc(E.video_datei)})</option></select></label>
+        <label>Sichtbarkeit <select id="ySicht" class="btn klein"><option>privat</option><option selected>nicht gelistet</option><option>öffentlich</option></select></label>
+        ${E.thumbnail ? `<label><input type="checkbox" id="yBild" checked> Vorschaubild mitschicken</label>` : `<span class="muted">Kein Vorschaubild gewählt (Reiter Bilder → Als Thumbnail).</span>`}
+        <button class="btn p" id="yHoch" disabled>Jetzt hochladen</button>
+      </div></div>`;
+  api("/api/schnitt", {ordner: AKTIV_ORDNER, art: "liste"}).then(r => { if ($("#yDatei")) $("#yDatei").innerHTML += r.dateien.map(p => `<option value="${esc(p)}">${esc(p.split("/").pop())}</option>`).join(""); }).catch(() => {});
+  api("/api/youtube", {}).then(s => {
+    if (!$("#yStand")) return;
+    $("#yStand").innerHTML = s.angemeldet ? "Bei YouTube angemeldet. Das Video geht erst nach dem Klick auf <b>Jetzt hochladen</b> raus."
+      : "Noch nicht bei YouTube angemeldet. Einrichten unter <b>Verlauf &amp; Einstellungen → YouTube-Upload</b>.";
+    $("#yHoch").disabled = !s.angemeldet;
+  }).catch(() => {});
+  $("#yHoch").onclick = async () => {
+    const b = $("#yHoch");
+    if (b.dataset.sicher !== "1") { b.dataset.sicher = "1"; b.textContent = `Wirklich ${$("#ySicht").value} hochladen?`; b.style.borderColor = "var(--warn)"; return; }
+    b.dataset.sicher = ""; b.textContent = "Jetzt hochladen"; b.style.borderColor = "";
+    try {
+      await api("/api/youtube_upload", {ordner: AKTIV_ORDNER, datei: $("#yDatei").value, titel: $("#yTitel").value, beschreibung: $("#yText").value,
+        tags: $("#yTags").value, sichtbarkeit: $("#ySicht").value, thumbnail: !!($("#yBild") && $("#yBild").checked)});
+      beobachten(); toast("Upload gestartet. Der Fortschritt steht links.");
+    } catch (e) { toast("Upload nicht möglich: " + esc(e.message), true); }
+  };
+  $$("#t-export [data-x]").forEach(b => b.onclick = () => speichern([b.dataset.x]));
+  $("#xAlles").onclick = () => speichern(liste.map(x => x[1]), {zip: true, praefix: "Analyse " + AKTIV_ORDNER});
+  $("#xAllesMitAudio").onclick = () => speichern([...liste.map(x => x[1]), ...Object.values(E.audio), ...E.bild.szenen.map(s => "bilder/" + s.bild)], {zip: true, praefix: "Analyse komplett " + AKTIV_ORDNER});
+  $("#xOrdner").onclick = async () => { try { const r = await api("/api/ordner_oeffnen", {ordner: AKTIV_ORDNER}); toast("Ordner: " + esc(r.pfad)); } catch (e) { toast(esc(e.message), true); } };
+}
+
+/* ---------- Cartesia ---------- */
+const BEISPIEL = `Wir haben 20 Arbeitsplätze, und die hängen alle an einem verwaltbaren Switch mit 48 Anschlüssen. Jeder Platz kriegt 1 Gbit/s. Das NAS kriegt 10 Gbit/s. Verkabelt wird mit Cat6A.
+
+Die Arbeitsplätze sitzen im VLAN 10, im Netz 192.168.10.0/27. Das gibt uns 30 nutzbare Adressen, und die verteilt der DHCP-Server von ganz allein.
+
+Alle Projekte liegen zentral auf dem NAS: 6 Festplatten mit je 12 TB im RAID 6. Aber ein RAID ist kein Backup!`;
+$("#cBeispiel").onclick = () => $("#cText").value = BEISPIEL;
+$("#cLeeren").onclick = () => { $("#cText").value = ""; $("#cErgebnis").innerHTML = ""; };
+$("#cAusTranskript").onclick = () => {
+  if (!E) return toast("Erst ein Video analysieren oder aus dem Verlauf öffnen.", true);
+  let txt = "", letzter = null;
+  E.zeilen.forEach((z, i) => { const neu = letzter && (z.start - letzter.ende > 1.5 || z.sprecher !== letzter.sprecher); txt += (neu ? "\n\n" : (i ? " " : "")) + z.text; letzter = z; });
+  $("#cText").value = txt.replace(/\b(ähm|äh|ehm)\b,?\s*/gi, ""); toast("Transkript übernommen (alte Füllwörter entfernt).");
+};
+async function cartesiaBauen() {
+  const text = $("#cText").value.trim(); if (!text) return toast("Bitte zuerst Text einfügen.", true);
+  try {
+    const r = await api("/api/cartesia", {text, optionen: {satzpause: $("#cSatz").value, absatzpause: $("#cAbsatz").value, doppelpunktpause: $("#cDoppel").value,
+      fueller: $("#cFueller").value, vorredner: $("#cVor").value, nachredner: $("#cNach").value, aussprache: $("#cAussprache").value, seed,
+      aehm_pause: $("#cAehm").value, modell: $("#cModell").value, stimme_id: $("#cStimme").value, tempo: $("#cTempo").value}});
+    const bunt = esc(r.text).replace(/&lt;break time=&quot;(\d+)ms&quot;\/&gt;/g, '<span class="br">&lt;break time="$1ms"/&gt;</span>').replace(/, ähm,/g, '<span class="fl">, ähm,</span>');
+    $("#cErgebnis").innerHTML = `<div class="karte"><h3>Fertiger Cartesia-Text</h3>
+      <p class="muted" style="margin:0 0 8px;font-size:13.5px">${r.woerter} Wörter · ${r.pausen} Pausen · ${r.zeichen} Zeichen · geschätzte Sprechdauer <span class="tc">${hms(r.sekunden)}</span></p>
+      <div class="ausgabe">${bunt}</div>
+      <div class="reihe" style="margin-top:8px"><button class="btn p klein" id="cKopieren">Text kopieren</button><button class="btn klein" id="cSpeichern">Als .txt speichern</button></div></div>
+      <div class="karte" style="margin-top:12px"><h3>Befehl für die Cartesia-Schnittstelle</h3>
+      <p class="muted" style="margin:0 0 8px;font-size:13.5px">Für die Cartesia-Webseite reicht der Text oben. Für die Schnittstelle: Anfrage als <span class="mono">cartesia_anfrage.json</span> speichern, im selben Ordner die Eingabeaufforderung öffnen, einmal <span class="mono">set CARTESIA_API_KEY=sk_car_…</span> eingeben und dann den Befehl einfügen. Oder unten auf <b>Jetzt an Cartesia senden</b> klicken. Von allein schickt das Programm nichts an Cartesia.</p>
+      <pre class="ausgabe mono" style="white-space:pre-wrap">${esc(r.api.befehl)}</pre>
+      <details style="margin-top:8px"><summary class="muted">Anfrage ansehen (JSON)</summary><pre class="ausgabe mono" style="white-space:pre-wrap;max-height:260px;overflow:auto">${esc(r.api.json)}</pre></details>
+      <div class="reihe" style="margin-top:8px"><button class="btn p klein" id="cBefehl">Befehl kopieren</button><button class="btn klein" id="cJson">Anfrage speichern (.json)</button>
+        <button class="btn klein" id="cSenden" title="Schickt den Text an Cartesia und speichert die Sprachdatei. Braucht den Cartesia-Schlüssel aus den Einstellungen und verbraucht Guthaben.">Jetzt an Cartesia senden</button></div></div>`;
+    $("#cSenden").onclick = async () => {
+      const b = $("#cSenden");
+      if (b.dataset.sicher !== "1") { b.dataset.sicher = "1"; b.textContent = "Wirklich senden? Das kostet Guthaben."; b.style.borderColor = "var(--warn)"; return; }
+      b.disabled = true; b.textContent = "Cartesia spricht …";
+      try { const s = await api("/api/cartesia_senden", {anfrage: r.api.json}); toast(s.abgebrochen ? "Speichern abgebrochen. Das Guthaben wurde trotzdem verbraucht." : "Sprachdatei gespeichert:<br>" + esc(s.gespeichert[0]), !!s.abgebrochen); }
+      catch (e) { toast("Senden nicht möglich: " + esc(e.message), true); }
+      b.disabled = false; b.dataset.sicher = ""; b.textContent = "Jetzt an Cartesia senden"; b.style.borderColor = "";
+    };
+    $("#cBefehl").onclick = () => kopieren(r.api.befehl);
+    $("#cJson").onclick = () => textSpeichern("cartesia_anfrage.json", r.api.json);
+    $("#cKopieren").onclick = () => kopieren(r.text);
+    $("#cSpeichern").onclick = () => textSpeichern("cartesia_text.txt", r.text);
+  } catch (e) { toast(esc(e.message), true); }
+}
+$("#cBauen").onclick = cartesiaBauen;
+$("#cNeuMischen").onclick = () => { seed = Math.floor(Math.random() * 1e6); cartesiaBauen(); };
+
+/* ---------- Verlauf & Einstellungen ---------- */
+async function ladeVerlauf() {
+  try {
+    const v = await api("/api/verlauf");
+    $("#verlaufListe").innerHTML = v.length ? v.map(x => `<div class="verlauf-zeile"><span><b>${esc(x.titel)}</b><br><span class="muted" style="font-size:13px">${hms(x.dauer)} · ${esc(x.art)} · ${x.mb} MB</span></span>
+      <span class="reihe"><button class="btn klein p" data-o="${esc(x.ordner)}">Öffnen</button><button class="btn klein" data-l="${esc(x.ordner)}">Löschen</button></span></div>`).join("") : `<p class="muted">Noch keine Analysen.</p>`;
+    const summe = v.reduce((a, x) => a + x.mb, 0);
+    $("#verlaufSumme").textContent = v.length ? `Belegt zusammen: ${summe.toFixed(1).replace(".", ",")} MB` : "";
+    $("#allesLoeschen").hidden = !v.length; $("#allesLoeschen").dataset.sicher = ""; $("#allesLoeschen").textContent = "Alle Analysen löschen";
+    $$("#verlaufListe [data-o]").forEach(b => b.onclick = () => oeffnen(b.dataset.o));
+    $$("#verlaufListe [data-l]").forEach(b => b.onclick = async () => {
+      if (b.dataset.sicher !== "1") { b.dataset.sicher = "1"; b.textContent = "Wirklich löschen?"; b.style.borderColor = "var(--err)"; return; }
+      try { await api("/api/loeschen", {ordner: b.dataset.l}); toast("Analyse vom PC gelöscht."); if (AKTIV_ORDNER === b.dataset.l) location.reload(); else ladeVerlauf(); }
+      catch (e) { toast(esc(e.message), true); }
+    });
+  } catch (e) { toast(esc(e.message), true); }
+}
+$("#eTesten").onclick = async () => {
+  toast("Teste Gemini …");
+  try { const r = await api("/api/gemini_test", {}); toast(r.ok ? `Gemini funktioniert (Modell: ${esc(r.modell)}).` : "Gemini hat unerwartet geantwortet.", !r.ok); }
+  catch (e) { toast("Gemini-Test fehlgeschlagen: " + esc(e.message), true); }
+};
+$("#allesLoeschen").onclick = async () => {
+  const b = $("#allesLoeschen");
+  if (b.dataset.sicher !== "1") { b.dataset.sicher = "1"; b.textContent = "Wirklich alle löschen?"; b.style.borderColor = "var(--err)"; return; }
+  try { const r = await api("/api/alles_loeschen", {}); toast(`${r.geloescht} Analyse(n) vom PC gelöscht.`); if (AKTIV_ORDNER) location.reload(); else ladeVerlauf(); }
+  catch (e) { toast(esc(e.message), true); }
+};
+async function ladeEinstellungen() {
+  try {
+    const e = await api("/api/einstellungen");
+    $("#eSchluessel").value = e.gemini_schluessel || ""; $("#eCartesia").value = e.cartesia_schluessel || ""; if (e.gemini_modell) $("#eModell").value = e.gemini_modell; $("#eBrowser").value = e.browser_cookies || "";
+    $("#eVideo").checked = e.gemini_video !== false;
+    if (e.cartesia_modell) $("#cModell").value = e.cartesia_modell; if (e.cartesia_stimme) $("#cStimme").value = e.cartesia_stimme;
+    $("#geminiChip").textContent = e.gemini_gesetzt ? "Gemini: Schlüssel gesetzt" : "Gemini: kein Schlüssel (nur lokal)";
+    $("#geminiChip").classList.toggle("an", !!e.gemini_gesetzt);
+  } catch {}
+}
+$("#eSpeichern").onclick = async () => {
+  try { await api("/api/einstellungen", {gemini_schluessel: $("#eSchluessel").value, cartesia_schluessel: $("#eCartesia").value, gemini_modell: $("#eModell").value, browser_cookies: $("#eBrowser").value, gemini_video: $("#eVideo").checked}); toast("Einstellungen gespeichert."); ladeEinstellungen(); }
+  catch (e) { toast(esc(e.message), true); }
+};
+
+async function youtubeStand(was) {
+  try {
+    if (was === "zugang") toast("Datei-Auswahl ist geöffnet (evtl. hinter dem Programmfenster) …");
+    if (was === "anmelden") toast("Die Google-Anmeldung öffnet sich im Browser. Dort anmelden und den Zugriff erlauben.");
+    const s = await api("/api/youtube", {was: was || "status"});
+    $("#ytStand").textContent = !s.zugang ? "Noch keine Zugangsdatei gewählt." : s.angemeldet ? "Eingerichtet und angemeldet." : "Zugangsdatei ist da. Jetzt noch anmelden.";
+    $("#ytAnmelden").disabled = !s.zugang; $("#ytAbmelden").disabled = !s.angemeldet;
+    if (was === "zugang" && !s.abgebrochen) toast(s.angemeldet ? "Zugang übernommen. Die vorhandene Anmeldung wurde gleich mit übernommen." : "Zugang übernommen. Jetzt bei YouTube anmelden.");
+    if (was === "anmelden") toast("Bei YouTube angemeldet.");
+    if (was === "abmelden") toast("Abgemeldet.");
+    if (E && was) zeigeExport();
+  } catch (e) { toast(esc(e.message), true); }
+}
+$("#ytZugang").onclick = () => youtubeStand("zugang");
+$("#ytAnmelden").onclick = () => youtubeStand("anmelden");
+$("#ytAbmelden").onclick = () => youtubeStand("abmelden");
+
+/* ---------- nightcut ---------- */
+async function nightcutStand(was) {
+  try {
+    if (was === "ordner") toast("Ordner-Auswahl ist geöffnet (evtl. hinter dem Programmfenster) …");
+    const s = await api("/api/nightcut", {was: was || "stand"});
+    $("#nStand").textContent = !s.vorhanden ? `nightcut wurde nicht gefunden (gesucht in ${s.ordner}). Bitte den Ordner wählen, in dem nightcut installiert ist.`
+      : !s.uv ? "nightcut gefunden, aber uv fehlt. nightcut braucht uv (winget install astral-sh.uv)." : `nightcut gefunden: ${s.ordner}`;
+    $("#nForm").hidden = !(s.vorhanden && s.uv);
+    const vorher = $("#nProfil").value;
+    $("#nProfil").innerHTML = s.profile.map(p => `<option${p === (vorher || "warzone") ? " selected" : ""}>${esc(p)}</option>`).join("");
+    $("#nTrennenTeil").hidden = !s.trennen; if (!s.trennen) $("#nTrennen").checked = false;
+  } catch (e) { toast(esc(e.message), true); }
+}
+$("#nOrdner").onclick = () => nightcutStand("ordner");
+$("#nDatei").onclick = async () => {
+  try { toast("Datei-Auswahl ist geöffnet (evtl. hinter dem Programmfenster) …"); const r = await api("/api/nightcut", {was: "aufnahme"}); if (r.pfad) $("#nAufnahme").value = r.pfad; }
+  catch (e) { toast(esc(e.message), true); }
+};
+$("#nStart").onclick = async () => {
+  const aufnahme = $("#nAufnahme").value.trim();
+  if (!aufnahme) return toast("Bitte zuerst eine Aufnahme wählen.", true);
+  try {
+    await api("/api/nightcut", {was: "start", aufnahme, profil: $("#nProfil").value, modus: $("#nModus").value, trennen: $("#nTrennen").checked, auffuellen: $("#nFill").checked});
+    $("#startHilfe").hidden = true; beobachten(); toast("nightcut läuft. Der Fortschritt steht links.");
+  } catch (e) { toast("nightcut nicht gestartet: " + esc(e.message), true); }
+};
+
+/* ---------- Programmfenster: meldet sich beim Programm, damit es sich nach dem Schließen selbst beendet ---------- */
+const FENSTER_ID = Math.random().toString(36).slice(2) + Date.now().toString(36);
+const fensterDa = () => fetch("/api/fenster", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({was: "da", id: FENSTER_ID})}).catch(() => {});
+fensterDa(); setInterval(fensterDa, 20000);
+window.addEventListener("pagehide", () => navigator.sendBeacon("/api/fenster", new Blob([JSON.stringify({was: "zu", id: FENSTER_ID})], {type: "application/json"})));
+window.addEventListener("beforeunload", ev => { if (LAEUFT) { ev.preventDefault(); ev.returnValue = ""; } });
+
+/* ---------- Start ---------- */
+(async () => {
+  ladeEinstellungen(); youtubeStand(); nightcutStand();
+  api("/api/update").then(u => { if (u.neu) { const c = $("#updateChip"); c.textContent = `Neue Version ${u.neu} verfügbar`; c.href = u.url; c.hidden = false; } }).catch(() => {});
+  try { const s = await api("/api/status"); if (s.laeuft) { $("#startHilfe").hidden = true; beobachten(); } } catch {}
+})();
+</script>
+</body>
+</html>
